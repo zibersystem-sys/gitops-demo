@@ -1,0 +1,47 @@
+# overlays/dev/kustomization.yaml
+
+
+
+namespace: dev
+
+
+
+resources:
+
+- ../../base
+
+
+
+replicas:
+
+- name: webapp
+
+  count: 1
+
+
+
+images:
+
+- name: nginx
+
+  newTag: "1.25"
+
+
+
+configMapGenerator:
+
+- name: app-config
+
+  behavior: merge
+
+
+
+  literals:
+
+  - ENVIRONMENT=dev
+
+
+
+generatorOptions:
+
+  disableNameSuffixHash: true

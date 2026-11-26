@@ -1,0 +1,70 @@
+apiVersion: v1
+data:
+  ENVIRONMENT: prod
+kind: ConfigMap
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  name: app-config
+  namespace: prod
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service
+  namespace: prod
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: webapp
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  name: webapp
+  namespace: prod
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: webapp
+  template:
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - env:
+        - name: ENV
+          valueFrom:
+            configMapKeyRef:
+              key: ENVIRONMENT
+              name: app-config
+        image: nginx:1.26
+        name: nginx
+        ports:
+        - containerPort: 80
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  name: migration-job
+  namespace: prod
+spec:
+  template:
+    spec:
+      containers:
+      - command:
+        - sh
+        - -c
+        - echo Running DB Migration && sleep 15
+        image: busybox
+        name: migration
+      restartPolicy: Never

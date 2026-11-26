@@ -1,0 +1,45 @@
+# base/migration-job.yaml
+
+
+
+apiVersion: batch/v1
+
+kind: Job
+
+
+
+metadata:
+
+  name: migration-job
+
+  annotations:
+
+    argocd.argoproj.io/sync-wave: "1"
+
+
+
+spec:
+
+  template:
+
+    spec:
+
+      restartPolicy: Never
+
+
+
+      containers:
+
+      - name: migration
+
+        image: busybox
+
+
+
+        command:
+
+        - sh
+
+        - -c
+
+        - "echo Running DB Migration && sleep 15"
